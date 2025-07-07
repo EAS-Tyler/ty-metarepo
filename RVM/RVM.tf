@@ -1,44 +1,54 @@
+# GITHUB
 resource "github_repository" "repository" {
-
   name        = var.repository_name
   description = var.repository_description
   visibility  = "private"
   auto_init   = true
 }
 
-resource "kubernetes_service_account" "tf_plan_prod" {
+# KUBERNETES
+
+resource "kubernetes_service_account" "k8s-sa" {
   metadata {
-    name      = "tf-harness-demo2"
-    namespace = "ty-demo"
+    name      = "${var.repository_name}-sa"
+    namespace = "${var.repository_name}-ns"
   }
 }
 
-# names need to be dyanmic!
-resource "kubernetes_role" "example_role" {
+resource "kubernetes_role" "k8s-role" {
   metadata {
-    name = "example-role"
-    namespace = "default"
+    name      = "${var.repository_name}-role"
+    namespace = kubernetes_service_account.k8s-sa.metadata[0].namespace
   }
   rule {
     api_groups = [""]
     resources = ["pods"]
-    verbs = ["get", "list", "watch", "create", "update", "patch", "delete"]
+    verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
 }
 
-resource "kubernetes_role_binding" "example_role_binding" {
+resource "kubernetes_role_binding" "k8s-role-binding" {
   metadata {
-    name = "example-role-binding"
-    namespace = "default"
+    name      = "${var.repository_name}-role-binding"
+    namespace = kubernetes_service_account.k8s-sa.metadata[0].namespace
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
-    kind = "Role"
-    name = kubernetes_role.example_role.metadata[0].name
+    kind      = "Role"
+    name      = kubernetes_role.k8s-role.metadata[0].name
   }
   subject {
-    kind = "ServiceAccount"
-    name = kubernetes_service_account.tf_plan_prod.metadata[0].name
-    namespace = "default"
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.k8s-sa.metadata[0].name
+    namespace = kubernetes_service_account.k8s-sa.metadata[0].namespace
   }
 }
+
+# HARNESS
+
+resource "harness_platform_project" "project" {  
+    name      = "${var.repository_name}-project"
+    identifier = var.repository_name
+    org_id    = "default"  
+}
+
