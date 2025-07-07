@@ -48,7 +48,7 @@ resource "kubernetes_role_binding" "k8s-role-binding" {
 
 resource "harness_platform_project" "project" {  
     name      = "${var.repository_name}-project"
-    identifier = var.repository_name
+    identifier = replace(var.repository_name, "-", "_")
     org_id    = "default"  
 }
 
