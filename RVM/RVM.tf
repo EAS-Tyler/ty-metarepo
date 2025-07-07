@@ -8,7 +8,7 @@ resource "github_repository" "repository" {
 
 resource "kubernetes_service_account" "tf_plan_prod" {
   metadata {
-    name      = "tf-harness-demo"
+    name      = "tf-harness-demo2"
     namespace = "ty-demo"
   }
 }
