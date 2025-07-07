@@ -8,10 +8,16 @@ resource "github_repository" "repository" {
 
 # KUBERNETES
 
+resource "kubernetes_namespace" "k8s-ns" {
+  metadata {
+    name = "${var.repository_name}-ns"
+  }
+}
+
 resource "kubernetes_service_account" "k8s-sa" {
   metadata {
     name      = "${var.repository_name}-sa"
-    namespace = "${var.repository_name}-ns"
+    namespace = kubernetes_namespace.k8s-ns.metadata[0].name
   }
 }
 
@@ -45,7 +51,6 @@ resource "kubernetes_role_binding" "k8s-role-binding" {
 }
 
 # HARNESS
-
 resource "harness_platform_project" "project" {  
     name      = "${var.repository_name}-project"
     identifier = replace(var.repository_name, "-", "_")
