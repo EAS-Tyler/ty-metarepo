@@ -51,13 +51,13 @@ resource "kubernetes_role_binding" "k8s-role-binding" {
 
 resource "kubernetes_token_request_v1" "this" {
   metadata {
-    name      = "${var.repository_name}-sa"
-    namespace = kubernetes_namespace.k8s-ns.metadata[0].name
+    name      = kubernetes_service_account_v1.k8s-sa.metadata[0].name
+    namespace = kubernetes_service_account_v1.k8s-sa.metadata[0].namespace
   }
   spec {
     audiences = [
       "api",
-      "vault",
+      "vault", 
       "factors"
     ]
   }
@@ -96,7 +96,7 @@ resource "harness_platform_secret_text" "github_token" {
 
 resource "harness_platform_connector_kubernetes" "k8sconn" {
   name        = "${var.repository_name}-k8s"
-  identifier  = replace(var.repository_name, "-", "_")
+  identifier  = "${replace(var.repository_name, "-", "_")}_k8s"
   description = "Kubernetes connector for ${var.repository_name}"
   project_id  = harness_platform_project.project.identifier
   org_id      = "default"
@@ -130,7 +130,7 @@ resource "harness_platform_connector_kubernetes" "k8sconn" {
 
 resource "harness_platform_connector_github" "githubconn" {
   name       = "${var.repository_name}-github"
-  identifier = replace(var.repository_name, "-", "_")
+  identifier = "${replace(var.repository_name, "-", "_")}_github"
   project_id = harness_platform_project.project.identifier
   org_id     = "default"
 
