@@ -14,13 +14,14 @@ terraform {
 
   }
 
-  backend "gcs" {
-    bucket = "easinfra-tfstate-bucket"
-    prefix = "terraform/state/ty-demo"
-  }
+  # backend "gcs" {
+  #   bucket = "easinfra-tfstate-bucket"
+  #   prefix = "terraform/state/ty-demo"
+  # }
 }
-provider "github" {
-}
+# provider "github" {
+# }
+# Redundant^^  
 
 provider "harness" {
   endpoint         = "https://app.harness.io/gateway"
