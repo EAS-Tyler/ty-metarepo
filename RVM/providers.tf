@@ -8,7 +8,7 @@ terraform {
     }
     harness = {
       source  = "harness/harness"
-      version = "0.37.5"
+      version = "0.37.6"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
