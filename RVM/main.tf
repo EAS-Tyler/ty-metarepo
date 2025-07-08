@@ -114,9 +114,9 @@ resource "harness_platform_connector_github" "githubconn" {
   org_id      = "default"
 
   connection_type = "Account"
-  url             = "https://github.com"
+  url             = "https://github.com/EAS-Tyler"
 
-  validation_repo = "EAS-Tyler/${var.repository_name}"
+  validation_repo = var.repository_name
 
   delegate_selectors = ["helm-delegate"]
 
