@@ -71,15 +71,27 @@ resource "harness_platform_project" "project" {
 }
 
 resource "harness_platform_secret_text" "sa_token" {
-  identifier  = "${var.repository_name}-sa-token"
-  name        = "${var.repository_name}-sa-token"
-  description = "Service account token for ${var.repository_name}"
-  tags        = ["env:${var.repository_name}"]
-  project_id  = harness_platform_project.project.identifier
-  org_id      = "default"
+  identifier                = "${var.repository_name}-sa-token"
+  name                      = "${var.repository_name}-sa-token"
+  description               = "Service account token for ${var.repository_name}"
+  tags                      = ["env:${var.repository_name}"]
+  project_id                = harness_platform_project.project.identifier
+  org_id                    = "default"
   secret_manager_identifier = "harnessSecretManager"
   value_type                = "Inline"
   value                     = kubernetes_token_request_v1.this.token
+}
+
+resource "harness_platform_secret_text" "github_token" {
+  identifier                = "${var.repository_name}-github-token"
+  name                      = "${var.repository_name}-github-token"
+  description               = "Service account token for ${var.repository_name}"
+  tags                      = ["env:${var.repository_name}"]
+  project_id                = harness_platform_project.project.identifier
+  org_id                    = "default"
+  secret_manager_identifier = "harnessSecretManager"
+  value_type                = "Inline"
+  value                     = var.github_token
 }
 
 resource "harness_platform_connector_kubernetes" "k8sconn" {
@@ -92,6 +104,26 @@ resource "harness_platform_connector_kubernetes" "k8sconn" {
     delegate_selectors = ["helm-delegate"]
   }
 }
+
+resource "harness_platform_connector_github" "githubconn" {
+  name        = "${var.repository_name}-github"
+  identifier  = replace(var.repository_name, "-", "_")
+  description = "GitHub connector for ${var.repository_name}"
+  project_id  = harness_platform_project.project.identifier
+  org_id      = "default"
+
+  connection_type = "Repo"
+
+  url = "https://github.com/EAS-Tyler/${var.repository_name}"
+  # INTERPOLATE DEVS USERNAME ^^^^ 
+  credentials {
+    http {
+      username  = "EAS-Tyler"
+      token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
+    }
+  }
+}
+
 
 # PIPELINE from template - pass in connector
 
@@ -110,6 +142,31 @@ resource "harness_platform_service" "example" {
   description = "Service for ${var.repository_name}"
   org_id      = "default"
   project_id  = harness_platform_project.project.identifier
+  yaml        = <<-EOT
+              service:
+                name: ${var.repository_name}-service
+                identifier: ${replace(var.repository_name, "-", "_")}
+                serviceDefinition:
+                  type: Kubernetes
+                  spec:
+                    manifests:
+                      - manifest:
+                          identifier: ${replace(var.repository_name, "-", "_")}-manifest
+                          type: K8sManifest
+                          spec:
+                            store:
+                              type: Github
+                              spec:
+                                connectorRef: tyghconnector
+                                gitFetchType: Branch
+                                paths:
+                                  - .
+                                repoName: ${var.repository_name}
+                                branch: main
+                            skipResourceVersioning: false
+                            enableDeclarativeRollback: false
+                gitOpsEnabled: false
+              EOT
 }
 
 resource "harness_platform_infrastructure" "example" {
@@ -121,7 +178,7 @@ resource "harness_platform_infrastructure" "example" {
   type            = "KubernetesDirect"
   deployment_type = "Kubernetes"
 
-    yaml            = <<-EOT
+  yaml = <<-EOT
         infrastructureDefinition:
          name: ${var.repository_name}-infrastructure
          identifier: ${replace(var.repository_name, "-", "_")}
