@@ -12,21 +12,17 @@ terraform {
       version = "0.37.5"
     }
 
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.23.0"
+    }
+
   }
 
   # backend "gcs" {
   #   bucket = "easinfra-tfstate-bucket"
   #   prefix = "terraform/state/ty-demo"
   # }
-}
-# provider "github" {
-# }
-# Redundant^^  
-
-provider "harness" {
-  endpoint         = "https://app.harness.io/gateway"
-  account_id       = "3gVpG6oMRf6AINkET4hUuw"
-  platform_api_key = var.pat
 }
 
 # provider "kubernetes" {

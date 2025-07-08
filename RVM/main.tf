@@ -14,7 +14,7 @@ resource "kubernetes_namespace" "k8s-ns" {
   }
 }
 
-resource "kubernetes_service_account" "k8s-sa" {
+resource "kubernetes_service_account_v1" "k8s-sa" {
   metadata {
     name      = "${var.repository_name}-sa"
     namespace = kubernetes_namespace.k8s-ns.metadata[0].name
@@ -24,19 +24,19 @@ resource "kubernetes_service_account" "k8s-sa" {
 resource "kubernetes_role" "k8s-role" {
   metadata {
     name      = "${var.repository_name}-role"
-    namespace = kubernetes_service_account.k8s-sa.metadata[0].namespace
+    namespace = kubernetes_service_account_v1.k8s-sa.metadata[0].namespace
   }
   rule {
     api_groups = [""]
-    resources = ["pods"]
-    verbs     = ["get", "list", "watch", "create", "update", "patch", "delete"]
+    resources  = ["pods"]
+    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
   }
 }
 
 resource "kubernetes_role_binding" "k8s-role-binding" {
   metadata {
     name      = "${var.repository_name}-role-binding"
-    namespace = kubernetes_service_account.k8s-sa.metadata[0].namespace
+    namespace = kubernetes_service_account_v1.k8s-sa.metadata[0].namespace
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -45,15 +45,57 @@ resource "kubernetes_role_binding" "k8s-role-binding" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.k8s-sa.metadata[0].name
-    namespace = kubernetes_service_account.k8s-sa.metadata[0].namespace
+    name      = kubernetes_service_account_v1.k8s-sa.metadata[0].name
+    namespace = kubernetes_service_account_v1.k8s-sa.metadata[0].namespace
+  }
+}
+
+resource "kubernetes_token_request_v1" "this" {
+  metadata {
+    name = "${var.repository_name}-token-request"
+    namespace = kubernetes_namespace.k8s-ns.metadata[0].name
+  }
+  spec {
+    audiences = [
+      "api",
+      "vault",
+      "factors"
+    ]
   }
 }
 
 # HARNESS
-resource "harness_platform_project" "project" {  
-    name      = "${var.repository_name}-project"
-    identifier = replace(var.repository_name, "-", "_")
-    org_id    = "default"  
+resource "harness_platform_project" "project" {
+  name       = "${var.repository_name}-project"
+  identifier = replace(var.repository_name, "-", "_")
+  org_id     = "default"
 }
 
+resource "harness_platform_secret_text" "sa_token" {
+  identifier  = "${var.repository_name}-sa-token"
+  name        = "${var.repository_name}-sa-token"
+  description = "Service account token for ${var.repository_name}"
+  tags        = ["env:${var.repository_name}"]
+
+  secret_manager_identifier = "harnessSecretManager"
+  value_type                = "Inline"
+  value                     = kubernetes_token_request_v1.this.token
+}
+
+resource "harness_platform_connector_kubernetes" "k8sconn" {
+  name        = "${var.repository_name}-k8s"
+  identifier  = "${var.repository_name}-k8s"
+  description = "Kubernetes connector for ${var.repository_name}"
+
+  inherit_from_delegate {
+    delegate_selectors = ["helm-delegate"]
+  }
+} 
+
+
+# output "k8s_connector_id" {
+#   value = harness_platform_connector_kubernetes.k8sconn.identifier
+# }
+# output "harness_project_id" {
+#   value = harness_platform_project.project.identifier
+# }
