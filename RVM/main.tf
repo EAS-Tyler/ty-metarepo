@@ -111,14 +111,17 @@ resource "harness_platform_connector_github" "githubconn" {
   description     = "GitHub connector for ${var.repository_name}"
   project_id      = harness_platform_project.project.identifier
   org_id          = "default"
-  connection_type = "Repo"
-  url             = "https://github.com/EAS-Tyler/${var.repository_name}"
-  # INTERPOLATE DEVS USERNAME ^^^^ 
+  connection_type = "Account"
+  url             = "https://github.com/EAS-Tyler"
+  # INTERPOLATE DEVS USERNAME ^^^^
   credentials {
     http {
       username  = "EAS-Tyler"
       token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
     }
+  }
+  api_authentication {
+    token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
   }
 }
 
