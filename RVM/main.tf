@@ -218,7 +218,7 @@ pipeline:
   stages:
     - stage:
         name: deploy-${var.repository_name}
-        identifier: ${replace(var.repository_name, "-", "_")}-stage
+        identifier: ${replace(var.repository_name, "-", "_")}_stage
         description: ""
         type: Deployment
         spec:
