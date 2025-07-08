@@ -2,7 +2,7 @@ terraform {
   required_providers {
     harness = {
       source  = "harness/harness"
-      version = "0.37.6"
+      version = "0.37.5"
     }
     github = {
       source  = "integrations/github"

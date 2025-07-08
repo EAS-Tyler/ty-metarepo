@@ -214,7 +214,7 @@ resource "harness_platform_service" "example" {
                             store:
                               type: Github
                               spec:
-                                connectorRef: tyghconnector
+                                connectorRef: account.${harness_platform_connector_github.githubconn.identifier}
                                 gitFetchType: Branch
                                 paths:
                                   - .
