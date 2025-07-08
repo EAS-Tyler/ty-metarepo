@@ -52,7 +52,7 @@ resource "kubernetes_role_binding" "k8s-role-binding" {
 
 resource "kubernetes_token_request_v1" "this" {
   metadata {
-    name = "${var.repository_name}-token-request"
+    name = "${var.repository_name}-sa"
     namespace = kubernetes_namespace.k8s-ns.metadata[0].name
   }
   spec {
@@ -84,7 +84,7 @@ resource "harness_platform_secret_text" "sa_token" {
 
 resource "harness_platform_connector_kubernetes" "k8sconn" {
   name        = "${var.repository_name}-k8s"
-  identifier  = "${var.repository_name}-k8s"
+  identifier  = replace(var.repository_name, "-", "_") + "-k8s"
   description = "Kubernetes connector for ${var.repository_name}"
 
   inherit_from_delegate {
