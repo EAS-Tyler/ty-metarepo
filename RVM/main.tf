@@ -106,15 +106,13 @@ resource "harness_platform_connector_kubernetes" "k8sconn" {
 }
 
 resource "harness_platform_connector_github" "githubconn" {
-  name        = "${var.repository_name}-github"
-  identifier  = replace(var.repository_name, "-", "_")
-  description = "GitHub connector for ${var.repository_name}"
-  project_id  = harness_platform_project.project.identifier
-  org_id      = "default"
-
+  name            = "${var.repository_name}-github"
+  identifier      = replace(var.repository_name, "-", "_")
+  description     = "GitHub connector for ${var.repository_name}"
+  project_id      = harness_platform_project.project.identifier
+  org_id          = "default"
   connection_type = "Repo"
-
-  url = "https://github.com/EAS-Tyler/${var.repository_name}"
+  url             = "https://github.com/EAS-Tyler/${var.repository_name}"
   # INTERPOLATE DEVS USERNAME ^^^^ 
   credentials {
     http {
@@ -124,9 +122,6 @@ resource "harness_platform_connector_github" "githubconn" {
   }
 }
 
-
-# PIPELINE from template - pass in connector
-
 resource "harness_platform_environment" "environment" {
   identifier = replace(var.repository_name, "-", "_")
   name       = "${var.repository_name}-environment"
@@ -134,7 +129,6 @@ resource "harness_platform_environment" "environment" {
   project_id = harness_platform_project.project.identifier
   type       = "PreProduction"
 }
-
 
 resource "harness_platform_service" "example" {
   identifier  = replace(var.repository_name, "-", "_")
@@ -196,24 +190,70 @@ resource "harness_platform_infrastructure" "example" {
       EOT
 }
 
+# PIPELINE from template - pass in connector
+resource "harness_platform_pipeline" "example" {
+  identifier = replace(var.repository_name, "-", "_")
+  org_id     = "default"
+  project_id = harness_platform_project.project.identifier
+  name       = "${var.repository_name}-pipeline"
+  # git_details {
+  #   branch_name    = "branchName"
+  #   commit_message = "commitMessage"
+  #   file_path      = "filePath"
+  #   connector_ref  = "connectorRef"
+  #   store_type     = "REMOTE"
+  #   repo_name      = "repoName"
+  # }
 
-
-
-
-
-# create service 
-# create github connector
-
-# resource "harness_platform_pipeline" "pipeline" {
-#   identifier = replace(var.repository_name, "-", "_")
-#   org_id     = "default"
-#   project_id = harness_platform_project.project.identifier
-#   name       = "${var.repository_name}-pipeline"
-#   yaml       = file("${path.module}/pipeline.yaml")
-# }
-
-
-# what level in heirarchy do i want these created at? IN THE DEVS PROJECT
+  yaml = <<-EOT
+pipeline:
+  name: ${var.repository_name}-pipeline
+  identifier: ${replace(var.repository_name, "-", "_")}
+  projectIdentifier: ${harness_platform_project.project.identifier}
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: deploy-${var.repository_name}
+        identifier: ${replace(var.repository_name, "-", "_")}-stage
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: ${harness_platform_service.example.identifier}
+          environment:
+            environmentRef: ${harness_platform_environment.environment.identifier}
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: ${harness_platform_infrastructure.example.identifier}
+          execution:
+            steps:
+              - step:
+                  name: Rollout Deployment
+                  identifier: rolloutDeployment
+                  type: K8sRollingDeploy
+                  timeout: 10m
+                  spec:
+                    skipDryRun: false
+                    pruningEnabled: false
+            rollbackSteps:
+              - step:
+                  name: Rollback Rollout Deployment
+                  identifier: rollbackRolloutDeployment
+                  type: K8sRollingRollback
+                  timeout: 10m
+                  spec:
+                    pruningEnabled: false
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+  EOT
+}
 
 # output "k8s_connector_id" {
 #   value = harness_platform_connector_kubernetes.k8sconn.identifier
