@@ -9,7 +9,7 @@ variable "repository_name" {
 
 variable "repository_description" {
   type = string
-} 
+}
 
 variable "pat" {
   description = "Harness Platform API Key"

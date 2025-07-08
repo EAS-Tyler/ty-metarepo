@@ -7,7 +7,6 @@ resource "github_repository" "repository" {
 }
 
 # KUBERNETES
-
 resource "kubernetes_namespace" "k8s-ns" {
   metadata {
     name = "${var.repository_name}-ns"
@@ -52,7 +51,7 @@ resource "kubernetes_role_binding" "k8s-role-binding" {
 
 resource "kubernetes_token_request_v1" "this" {
   metadata {
-    name = "${var.repository_name}-sa"
+    name      = "${var.repository_name}-sa"
     namespace = kubernetes_namespace.k8s-ns.metadata[0].name
   }
   spec {
@@ -76,7 +75,8 @@ resource "harness_platform_secret_text" "sa_token" {
   name        = "${var.repository_name}-sa-token"
   description = "Service account token for ${var.repository_name}"
   tags        = ["env:${var.repository_name}"]
-
+  project_id  = harness_platform_project.project.identifier
+  org_id      = "default"
   secret_manager_identifier = "harnessSecretManager"
   value_type                = "Inline"
   value                     = kubernetes_token_request_v1.this.token
@@ -86,12 +86,20 @@ resource "harness_platform_connector_kubernetes" "k8sconn" {
   name        = "${var.repository_name}-k8s"
   identifier  = replace(var.repository_name, "-", "_")
   description = "Kubernetes connector for ${var.repository_name}"
-
+  project_id  = harness_platform_project.project.identifier
+  org_id      = "default"
   inherit_from_delegate {
     delegate_selectors = ["helm-delegate"]
   }
-} 
+}
 
+# PIPELINE from template - pass in connector
+
+
+
+
+
+# what level in heirarchy do i want these created at? IN THE DEVS PROJECT
 
 # output "k8s_connector_id" {
 #   value = harness_platform_connector_kubernetes.k8sconn.identifier
