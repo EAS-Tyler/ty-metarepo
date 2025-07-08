@@ -104,19 +104,14 @@ resource "harness_platform_connector_kubernetes" "k8sconn" {
     delegate_selectors = ["helm-delegate"]
   }
 }
-
-
 resource "harness_platform_connector_github" "githubconn" {
-  name        = "${var.repository_name}-github"
-  identifier  = replace(var.repository_name, "-", "_")
-  description = "GitHub connector for ${var.repository_name}"
-  project_id  = harness_platform_project.project.identifier
-  org_id      = "default"
+  name            = "${var.repository_name}-github"
+  identifier      = replace(var.repository_name, "-", "_")
+  project_id      = harness_platform_project.project.identifier
+  org_id          = "default"
 
-  connection_type = "Account"
-  url             = "https://github.com/EAS-Tyler"
-
-  validation_repo = var.repository_name
+  connection_type = "Repo"
+  url             = "https://github.com/EAS-Tyler/${var.repository_name}"
 
   delegate_selectors = ["helm-delegate"]
 
@@ -134,24 +129,32 @@ resource "harness_platform_connector_github" "githubconn" {
 
 
 # resource "harness_platform_connector_github" "githubconn" {
-#   name            = "${var.repository_name}-github"
-#   identifier      = replace(var.repository_name, "-", "_")
-#   description     = "GitHub connector for ${var.repository_name}"
-#   project_id      = harness_platform_project.project.identifier
-#   org_id          = "default"
+#   name        = "${var.repository_name}-github"
+#   identifier  = replace(var.repository_name, "-", "_")
+#   description = "GitHub connector for ${var.repository_name}"
+#   project_id  = harness_platform_project.project.identifier
+#   org_id      = "default"
+
 #   connection_type = "Account"
 #   url             = "https://github.com/EAS-Tyler"
-#   # INTERPOLATE DEVS USERNAME ^^^^
+
+#   validation_repo = var.repository_name
+
+#   delegate_selectors = ["helm-delegate"]
+
 #   credentials {
 #     http {
 #       username  = "EAS-Tyler"
 #       token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
 #     }
 #   }
+
 #   api_authentication {
 #     token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
 #   }
 # }
+
+
 
 resource "harness_platform_environment" "environment" {
   identifier = replace(var.repository_name, "-", "_")
