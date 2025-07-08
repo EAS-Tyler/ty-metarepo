@@ -84,7 +84,7 @@ resource "harness_platform_secret_text" "sa_token" {
 
 resource "harness_platform_connector_kubernetes" "k8sconn" {
   name        = "${var.repository_name}-k8s"
-  identifier  = replace(var.repository_name, "-", "_") + "-k8s"
+  identifier  = replace(var.repository_name, "-", "_")
   description = "Kubernetes connector for ${var.repository_name}"
 
   inherit_from_delegate {
