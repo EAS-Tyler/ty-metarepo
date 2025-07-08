@@ -149,7 +149,7 @@ resource "harness_platform_connector_github" "githubconn" {
   }
 
   api_authentication {
-    token_ref = harness_platform_secret_text.github_token.identifier 
+    token_ref = "account.gh_pat"
   }
 
   depends_on = [
