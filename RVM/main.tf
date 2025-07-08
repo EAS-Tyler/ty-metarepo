@@ -104,29 +104,6 @@ resource "harness_platform_connector_kubernetes" "k8sconn" {
     delegate_selectors = ["helm-delegate"]
   }
 }
-# resource "harness_platform_connector_github" "githubconn" {
-#   name            = "${var.repository_name}-github"
-#   identifier      = replace(var.repository_name, "-", "_")
-#   description     = "GitHub connector for ${var.repository_name}"
-#   project_id      = harness_platform_project.project.identifier
-#   org_id          = "default"
-
-#   connection_type = "Repo"
-#   url             = "https://github.com/EAS-Tyler/${var.repository_name}.git"
-
-#   delegate_selectors = ["helm-delegate"]
-
-#   credentials {
-#     http {
-#       username  = "EAS-Tyler"
-#       token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
-#     }
-#   }
-
-#   api_authentication {
-#     token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
-#   }
-# }
 
 resource "harness_platform_connector_github" "githubconn" {
   name       = "${var.repository_name}-github"
@@ -156,34 +133,6 @@ resource "harness_platform_connector_github" "githubconn" {
     github_repository.repository
   ]
 }
-
-# resource "harness_platform_connector_github" "githubconn" {
-#   name        = "${var.repository_name}-github"
-#   identifier  = replace(var.repository_name, "-", "_")
-#   description = "GitHub connector for ${var.repository_name}"
-#   project_id  = harness_platform_project.project.identifier
-#   org_id      = "default"
-
-#   connection_type = "Account"
-#   url             = "https://github.com/EAS-Tyler"
-
-#   validation_repo = var.repository_name
-
-#   delegate_selectors = ["helm-delegate"]
-
-#   credentials {
-#     http {
-#       username  = "EAS-Tyler"
-#       token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
-#     }
-#   }
-
-#   api_authentication {
-#     token_ref = "project.${harness_platform_secret_text.github_token.identifier}"
-#   }
-# }
-
-
 
 resource "harness_platform_environment" "environment" {
   identifier = replace(var.repository_name, "-", "_")
@@ -259,15 +208,6 @@ resource "harness_platform_pipeline" "example" {
   org_id     = "default"
   project_id = harness_platform_project.project.identifier
   name       = "${var.repository_name}-pipeline"
-  # git_details {
-  #   branch_name    = "branchName"
-  #   commit_message = "commitMessage"
-  #   file_path      = "filePath"
-  #   connector_ref  = "connectorRef"
-  #   store_type     = "REMOTE"
-  #   repo_name      = "repoName"
-  # }
-
   yaml = <<-EOT
 pipeline:
   name: ${var.repository_name}-pipeline
