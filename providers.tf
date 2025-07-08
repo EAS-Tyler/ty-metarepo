@@ -5,6 +5,10 @@ terraform {
       version = "0.37.5"
     }
   }
+  backend "gcs" {
+    bucket = "easinfra-tfstate-bucket"
+    prefix = "terraform/state/ty-metarepo"
+  }
 }
 
 provider "harness" {
