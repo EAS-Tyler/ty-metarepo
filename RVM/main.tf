@@ -95,8 +95,65 @@ resource "harness_platform_connector_kubernetes" "k8sconn" {
 
 # PIPELINE from template - pass in connector
 
+resource "harness_platform_environment" "environment" {
+  identifier = replace(var.repository_name, "-", "_")
+  name       = "${var.repository_name}-environment"
+  org_id     = "default"
+  project_id = harness_platform_project.project.identifier
+  type       = "PreProduction"
+}
 
 
+resource "harness_platform_service" "example" {
+  identifier  = replace(var.repository_name, "-", "_")
+  name        = "${var.repository_name}-service"
+  description = "Service for ${var.repository_name}"
+  org_id      = "default"
+  project_id  = harness_platform_project.project.identifier
+}
+
+resource "harness_platform_infrastructure" "example" {
+  identifier      = replace(var.repository_name, "-", "_")
+  name            = "${var.repository_name}-infrastructure"
+  org_id          = "default"
+  project_id      = harness_platform_project.project.identifier
+  env_id          = harness_platform_environment.environment.identifier
+  type            = "KubernetesDirect"
+  deployment_type = "Kubernetes"
+
+    yaml            = <<-EOT
+        infrastructureDefinition:
+         name: ${var.repository_name}-infrastructure
+         identifier: ${replace(var.repository_name, "-", "_")}
+         description: "Infrastructure for ${var.repository_name}"
+         orgIdentifier: default
+         projectIdentifier: ${harness_platform_project.project.identifier}
+         environmentRef: ${harness_platform_environment.environment.identifier}
+         deploymentType: Kubernetes
+         type: KubernetesDirect
+         spec:
+          connectorRef: account.${harness_platform_connector_kubernetes.k8sconn.identifier}
+          namespace: ${kubernetes_namespace.k8s-ns.metadata[0].name}
+          releaseName: release-${replace(var.repository_name, "-", "_")}
+          allowSimultaneousDeployments: false
+      EOT
+}
+
+
+
+
+
+
+# create service 
+# create github connector
+
+# resource "harness_platform_pipeline" "pipeline" {
+#   identifier = replace(var.repository_name, "-", "_")
+#   org_id     = "default"
+#   project_id = harness_platform_project.project.identifier
+#   name       = "${var.repository_name}-pipeline"
+#   yaml       = file("${path.module}/pipeline.yaml")
+# }
 
 
 # what level in heirarchy do i want these created at? IN THE DEVS PROJECT
