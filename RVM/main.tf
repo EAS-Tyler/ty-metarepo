@@ -289,7 +289,7 @@ resource "harness_platform_triggers" "example" {
         spec:
           type: Push
           spec:
-            connectorRef: account.${harness_platform_connector_github.githubconn.identifier}
+            connectorRef: project.${harness_platform_connector_github.githubconn.identifier}
             autoAbortPreviousExecutions: false
             payloadConditions: []
             headerConditions: []
