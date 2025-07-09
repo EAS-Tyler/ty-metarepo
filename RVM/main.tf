@@ -57,7 +57,7 @@ resource "kubernetes_token_request_v1" "this" {
   spec {
     audiences = [
       "api",
-      "vault", 
+      "vault",
       "factors"
     ]
   }
@@ -111,17 +111,17 @@ resource "harness_platform_connector_github" "githubconn" {
   project_id = harness_platform_project.project.identifier
   org_id     = "default"
 
-  connection_type = "Account"
-  url             = "https://github.com"
+  connection_type = "Repo"
+  url             = "https://github.com/EAS-Tyler/${var.repository_name}"
   # validation_repo = github_repository.repository.full_name
-  validation_repo = "https://github.com/EAS-Tyler/ty-metarepo.git"
+  # validation_repo = var.repository_name
 
   delegate_selectors = ["helm-delegate"]
 
   credentials {
     http {
       username  = "EAS-Tyler"
-      token_ref = harness_platform_secret_text.github_token.identifier 
+      token_ref = harness_platform_secret_text.github_token.identifier
     }
   }
 
@@ -133,6 +133,35 @@ resource "harness_platform_connector_github" "githubconn" {
     github_repository.repository
   ]
 }
+
+# resource "harness_platform_connector_github" "githubconn" {
+#   name       = "${var.repository_name}-github"
+#   identifier = "${replace(var.repository_name, "-", "_")}_github"
+#   project_id = harness_platform_project.project.identifier
+#   org_id     = "default"
+
+#   connection_type = "Account"
+#   url             = "https://github.com"
+#   # validation_repo = github_repository.repository.full_name
+#   validation_repo = "https://github.com/EAS-Tyler/ty-metarepo.git"
+
+#   delegate_selectors = ["helm-delegate"]
+
+#   credentials {
+#     http {
+#       username  = "EAS-Tyler"
+#       token_ref = harness_platform_secret_text.github_token.identifier 
+#     }
+#   }
+
+#   api_authentication {
+#     token_ref = "account.gh_pat"
+#   }
+
+#   depends_on = [
+#     github_repository.repository
+#   ]
+# }
 
 resource "harness_platform_environment" "environment" {
   identifier = replace(var.repository_name, "-", "_")
@@ -208,7 +237,7 @@ resource "harness_platform_pipeline" "example" {
   org_id     = "default"
   project_id = harness_platform_project.project.identifier
   name       = "${var.repository_name}-pipeline"
-  yaml = <<-EOT
+  yaml       = <<-EOT
 pipeline:
   name: ${var.repository_name}-pipeline
   identifier: ${replace(var.repository_name, "-", "_")}
@@ -303,7 +332,6 @@ resource "harness_platform_triggers" "example" {
   depends_on = [
     harness_platform_pipeline.example,
     github_repository.repository
-
   ]
 }
 
