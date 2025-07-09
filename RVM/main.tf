@@ -263,6 +263,44 @@ pipeline:
   ]
 }
 
+resource "harness_platform_triggers" "example" {
+  identifier = replace(var.repository_name, "-", "_") + "_trigger"
+  org_id     = "default"
+  project_id = harness_platform_project.project.identifier
+  name       = "${var.repository_name}-trigger"
+  target_id  = harness_platform_pipeline.example.identifier
+  yaml       = <<-EOT
+  trigger:
+    name: ${var.repository_name}-trigger
+    identifier: ${replace(var.repository_name, "-", "_")}_trigger
+    enabled: true
+    encryptedWebhookSecretIdentifier: ""
+    description: ""
+    tags: {}
+    orgIdentifier: default
+    stagesToExecute: []
+    projectIdentifier: ${harness_platform_project.project.identifier}
+    pipelineIdentifier: ${harness_platform_pipeline.example.identifier}
+    source:
+      type: Webhook
+      spec:
+        type: Github
+        spec:
+          type: Push
+          spec:
+            connectorRef: account.${harness_platform_connector_github.githubconn.identifier}
+            autoAbortPreviousExecutions: false
+            payloadConditions: []
+            headerConditions: []
+            repoName: ${var.repository_name}
+            actions: []
+    inputYaml: |
+      pipeline:
+        identifier: ${harness_platform_pipeline.example.identifier}
+    EOT
+}
+
+
 output "k8s_connector_id" {
   value = harness_platform_connector_kubernetes.k8sconn.identifier
 }
