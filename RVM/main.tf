@@ -301,7 +301,7 @@ resource "harness_platform_triggers" "example" {
     EOT
 
   depends_on = [
-    harness_platform_pipeline.example
+    harness_platform_pipeline.example,
     github_repository.repository
 
   ]
