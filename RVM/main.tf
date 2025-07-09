@@ -259,7 +259,8 @@ pipeline:
 
   depends_on = [
     harness_platform_service.example,
-    harness_platform_infrastructure.example
+    harness_platform_infrastructure.example,
+    harness_platform_connector_github.githubconn
   ]
 }
 
@@ -298,6 +299,12 @@ resource "harness_platform_triggers" "example" {
       pipeline:
         identifier: ${harness_platform_pipeline.example.identifier}
     EOT
+
+  depends_on = [
+    harness_platform_pipeline.example
+    github_repository.repository
+
+  ]
 }
 
 
