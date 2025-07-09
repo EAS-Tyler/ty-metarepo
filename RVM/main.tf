@@ -263,9 +263,9 @@ pipeline:
   ]
 }
 
-# output "k8s_connector_id" {
-#   value = harness_platform_connector_kubernetes.k8sconn.identifier
-# }
-# output "harness_project_id" {
-#   value = harness_platform_project.project.identifier
-# }
+output "k8s_connector_id" {
+  value = harness_platform_connector_kubernetes.k8sconn.identifier
+}
+output "harness_project_id" {
+  value = harness_platform_project.project.identifier
+}
