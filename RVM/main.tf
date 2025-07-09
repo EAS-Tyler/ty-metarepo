@@ -200,7 +200,7 @@ resource "harness_platform_infrastructure" "example" {
          spec:
           connectorRef: ${harness_platform_connector_kubernetes.k8sconn.identifier}
           namespace: ${kubernetes_namespace.k8s-ns.metadata[0].name}
-          releaseName: release-${replace(var.repository_name, "-", "_")}
+          releaseName: release-${replace(var.repository_name, "_", "-")}
           allowSimultaneousDeployments: false
       EOT
 }
