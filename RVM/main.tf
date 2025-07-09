@@ -264,7 +264,7 @@ pipeline:
 }
 
 resource "harness_platform_triggers" "example" {
-  identifier = replace(var.repository_name, "-", "_") + "_trigger"
+  identifier = "${replace(var.repository_name, "-", "_")}_trigger"
   org_id     = "default"
   project_id = harness_platform_project.project.identifier
   name       = "${var.repository_name}-trigger"
